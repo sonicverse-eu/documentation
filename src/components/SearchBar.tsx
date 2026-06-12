@@ -172,7 +172,11 @@ export function SearchBar() {
 
   const addIconsToResults = (items: SearchResult[]): SearchResult[] => {
     return items.map((item) => {
-      const iconName = item.metadata?.iconName || 'hashtag';
+      const iconName =
+        typeof item.metadata?.iconName === 'string'
+          ? item.metadata.iconName
+          : 'hashtag';
+
       return {
         ...item,
         icon: <Icon icon={iconName} size={16} color="gray" />,

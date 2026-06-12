@@ -5,22 +5,27 @@ import useMessagesStore from './useMessagesStore';
 
 const SUBDOMAIN = import.meta.env.PUBLIC_MINTLIFY_SUBDOMAIN;
 const API_KEY = import.meta.env.PUBLIC_MINTLIFY_ASSISTANT_KEY;
+const ASSISTANT_CONFIG_ERROR =
+  'Mintlify AI chat is not configured. Set PUBLIC_MINTLIFY_SUBDOMAIN.';
 
 export const useAssistant = () => {
   const isClearedRef = useRef(false);
   const [input, setInput] = useState('');
+  const isConfigured = Boolean(SUBDOMAIN);
 
-  const { threadId, setThreadId, threadKey, setThreadKey } = useMessagesStore();
+  const { threadId, setThreadId, setThreadKey, setError, error } =
+    useMessagesStore();
 
-  useEffect(() => {
-    sessionStorage.removeItem('assistant-threadKey');
-    sessionStorage.removeItem('assistant-threadId');
-    setThreadId(undefined);
-    setThreadKey(undefined);
-  }, []);
-
-  const { messages, sendMessage, status, setMessages, stop } = useChat({
-    id: `assistant-${SUBDOMAIN}`,
+  const {
+    messages,
+    sendMessage,
+    status,
+    setMessages,
+    stop,
+    clearError,
+    error: chatError,
+  } = useChat({
+    id: `assistant-${SUBDOMAIN || 'unconfigured'}`,
     transport: new DefaultChatTransport({
       api: `https://api.mintlify.com/discovery/v2/assistant/${SUBDOMAIN}/message`,
       headers: {
@@ -42,7 +47,19 @@ export const useAssistant = () => {
         };
       },
       fetch: async (url, options) => {
+        if (!isConfigured) {
+          throw new Error(ASSISTANT_CONFIG_ERROR);
+        }
+
         const response = await fetch(url, options);
+
+        if (!response.ok) {
+          const message =
+            response.status === 401 || response.status === 403
+              ? 'Mintlify AI chat authentication failed. Check PUBLIC_MINTLIFY_ASSISTANT_KEY.'
+              : `Mintlify AI chat request failed (${response.status}).`;
+          throw new Error(message);
+        }
 
         const tempThreadId = response.headers.get('x-thread-id');
         const tempThreadKey = response.headers.get('x-thread-key');
@@ -59,7 +76,18 @@ export const useAssistant = () => {
         return response;
       },
     }),
+    onError: (error) => {
+      setError(error.message || 'Mintlify AI chat request failed.');
+    },
   });
+
+  useEffect(() => {
+    const storedId = sessionStorage.getItem('assistant-threadId');
+    const storedKey = sessionStorage.getItem('assistant-threadKey');
+
+    if (storedId) setThreadId(storedId);
+    if (storedKey) setThreadKey(storedKey);
+  }, [setThreadId, setThreadKey]);
 
   useEffect(() => {
     useMessagesStore.setState({ messages });
@@ -69,26 +97,55 @@ export const useAssistant = () => {
     useMessagesStore.setState({ status });
   }, [status]);
 
+  useEffect(() => {
+    if (!isConfigured) {
+      setError(ASSISTANT_CONFIG_ERROR);
+    }
+  }, [isConfigured, setError]);
+
+  useEffect(() => {
+    if (chatError) {
+      setError(chatError.message || 'Mintlify AI chat request failed.');
+    }
+  }, [chatError, setError]);
+
   const isLoading = status === 'streaming' || status === 'submitted';
 
   const onClear = useCallback(() => {
     isClearedRef.current = true;
     stop();
+    clearError();
     setMessages([]);
     setInput('');
     setThreadId(undefined);
     setThreadKey(undefined);
     sessionStorage.removeItem('assistant-threadKey');
     sessionStorage.removeItem('assistant-threadId');
-    useMessagesStore.setState({ messages: [] });
-  }, [stop, setMessages, setThreadId, setThreadKey]);
+    useMessagesStore.setState({
+      messages: [],
+      error: isConfigured ? undefined : ASSISTANT_CONFIG_ERROR,
+    });
+  }, [
+    isConfigured,
+    stop,
+    clearError,
+    setMessages,
+    setThreadId,
+    setThreadKey,
+  ]);
 
   const handleSubmit = useCallback(() => {
     if (!input.trim() || status !== 'ready') return;
+    if (!isConfigured) {
+      setError(ASSISTANT_CONFIG_ERROR);
+      return;
+    }
     isClearedRef.current = false;
+    clearError();
+    setError(undefined);
     sendMessage({ text: input });
     setInput('');
-  }, [input, status, sendMessage]);
+  }, [input, status, isConfigured, clearError, setError, sendMessage]);
 
   return {
     input,
@@ -101,5 +158,6 @@ export const useAssistant = () => {
     onClear,
     stop,
     threadId,
+    error,
   };
 };

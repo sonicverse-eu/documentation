@@ -1,8 +1,8 @@
-import type { NavNode } from '@mintlify/astro/helpers';
-import { unwrapNav } from '@mintlify/astro/helpers';
 import { type SidebarItemStyle, type AnchorItem } from './types';
 import { SidebarEntries } from './SidebarEntries';
 import { Anchors } from './Anchors';
+import type { NavNode } from './nav';
+import { unwrapNav } from './nav';
 
 interface SidebarProps {
   navigation: NavNode;
