@@ -8,8 +8,27 @@
 @import './kbd.css';
 
 :root {
-  --primary: #16a34a;
-  --color-primary: #16a34a;
+  --primary: #b51f2e;
+  --color-primary: #b51f2e;
+  --background: #fbfbfa;
+  --foreground: #101214;
+  --surface-1: rgba(255, 255, 255, 0.96);
+  --surface-2: rgba(248, 249, 248, 0.92);
+  --surface-3: rgba(241, 243, 241, 0.94);
+  --muted-foreground: rgba(16, 18, 20, 0.58);
+  --border: rgba(16, 18, 20, 0.12);
+  --accent-solid: #b51f2e;
+  --accent-soft: #cf2d3c;
+  --accent-fog: rgba(181, 31, 46, 0.08);
+  --grid-line: rgba(16, 18, 20, 0.055);
+  --map-line: rgba(16, 18, 20, 0.105);
+  --route-line: rgba(181, 31, 46, 0.16);
+  --shadow-soft: 0 12px 36px rgba(12, 14, 18, 0.055);
+  --shadow-strong: 0 22px 72px rgba(12, 14, 18, 0.12);
+  --header-bg-from: rgba(251, 251, 250, 0.94);
+  --header-bg-to: rgba(251, 251, 250, 0.82);
+  --footer-bg-top: rgba(251, 251, 250, 0.98);
+  --footer-bg-bottom: rgba(243, 244, 243, 0.98);
 }
 
 @theme {
@@ -24,5 +43,71 @@
     10% {
       transform: translateY(2px);
     }
+  }
+}
+
+@layer base {
+  html {
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(181, 31, 46, 0.035), transparent 30rem),
+      linear-gradient(180deg, #ffffff 0%, #fbfbfa 46%, #f5f6f4 100%);
+    background-attachment: fixed;
+    color: var(--foreground);
+  }
+
+  *::selection {
+    background: var(--primary);
+    color: #fffafa;
+  }
+}
+
+@layer utilities {
+  .sonic-header-backdrop {
+    background: linear-gradient(180deg, var(--header-bg-from), var(--header-bg-to));
+    backdrop-filter: blur(16px) saturate(1.08);
+    -webkit-backdrop-filter: blur(16px) saturate(1.08);
+  }
+
+  .sonic-panel {
+    border: 1px solid var(--border);
+    background: var(--surface-1);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .sonic-muted-panel {
+    border: 1px solid rgba(16, 18, 20, 0.08);
+    background: var(--surface-2);
+  }
+
+  .quiet-grid {
+    background-image:
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .atlas-map {
+    background-image:
+      linear-gradient(112deg, transparent 0 18%, var(--map-line) 18.1% 18.18%, transparent 18.3%),
+      linear-gradient(32deg, transparent 0 52%, var(--route-line) 52.1% 52.28%, transparent 52.4%),
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+    background-size:
+      100% 100%,
+      100% 100%,
+      44px 44px,
+      44px 44px;
+  }
+
+  .footer-shell {
+    background:
+      radial-gradient(circle at 15% 0%, rgba(181, 31, 46, 0.045), transparent 24rem),
+      linear-gradient(180deg, var(--footer-bg-top), var(--footer-bg-bottom));
   }
 }

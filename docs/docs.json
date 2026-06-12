@@ -1,11 +1,11 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "name": "Mint Astro Starter Kit",
+  "name": "Sonicverse Docs",
   "theme": "mint",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#B51F2E",
+    "light": "#CF2D3C",
+    "dark": "#8F1824"
   },
   "navigation": {
     "tabs": [
@@ -26,14 +26,19 @@
     "global": {
       "anchors": [
         {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
+          "anchor": "Sonicverse",
+          "href": "https://sonicverse.tech",
+          "icon": "radio"
         },
         {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
+          "anchor": "Open Source",
+          "href": "https://sonicverse.tech/open-source",
+          "icon": "git-branch"
+        },
+        {
+          "anchor": "Roadmap",
+          "href": "https://sonicverse.tech/roadmap",
+          "icon": "map"
         }
       ]
     }

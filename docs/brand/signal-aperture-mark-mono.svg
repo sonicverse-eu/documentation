@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Sonicverse Signal Aperture mono mark</title>
+  <path d="M30 26h24v10H40v14H30V26Zm44 0h24v24H88V36H74V26ZM30 78h10v14h14v10H30V78Zm58 0h10v24H74V92h14V78Z" fill="currentColor"/>
+  <path d="M24 64h27l7-16 13 32 9-16h24" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter"/>
+</svg>

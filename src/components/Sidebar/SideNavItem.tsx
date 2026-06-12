@@ -15,35 +15,36 @@ const sidebarStyles: Record<
   { base?: string; active: string; inactive: string }
 > = {
   container: {
-    base: 'rounded-xl w-full outline-offset-[-1px]',
+    base: 'rounded-md w-full outline-offset-[-1px]',
     active: `bg-(--primary)/10 ${ACTIVE_TEXT}`,
-    inactive: 'hover:bg-gray-600/5 text-gray-700 hover:text-gray-900',
+    inactive:
+      'hover:bg-[rgba(16,18,20,0.045)] text-[rgba(16,18,20,0.68)] hover:text-[#101214]',
   },
   card: {
     base: 'ml-4 border-l outline-offset-[-1px]',
     active: `border-(--primary) bg-(--primary)/10 ${ACTIVE_TEXT}`,
     inactive:
-      'border-gray-950/5 hover:bg-gray-600/5 text-gray-700 hover:text-gray-900',
+      'border-[rgba(16,18,20,0.06)] hover:bg-[rgba(16,18,20,0.045)] text-[rgba(16,18,20,0.68)] hover:text-[#101214]',
   },
   border: {
     base: 'ml-4 border-l py-2 lg:py-1.5 w-[calc(100%-1rem)]',
     active: `border-(--primary) ${ACTIVE_TEXT}`,
     inactive:
-      'border-gray-950/5 hover:border-gray-950/20 text-gray-700 hover:text-gray-900',
+      'border-[rgba(16,18,20,0.06)] hover:border-[rgba(16,18,20,0.2)] text-[rgba(16,18,20,0.68)] hover:text-[#101214]',
   },
   undecorated: {
     active: `border-(--primary) ${ACTIVE_TEXT}`,
     inactive:
-      'border-gray-950/5 hover:border-gray-950/20 text-gray-700 hover:text-gray-950',
+      'border-[rgba(16,18,20,0.06)] hover:border-[rgba(16,18,20,0.2)] text-[rgba(16,18,20,0.68)] hover:text-[#101214]',
   },
   arrow: {
     active: `border-(--primary) ${ACTIVE_TEXT}`,
     inactive:
-      'border-gray-950/5 hover:border-gray-950/20 text-gray-700 hover:text-gray-950',
+      'border-[rgba(16,18,20,0.06)] hover:border-[rgba(16,18,20,0.2)] text-[rgba(16,18,20,0.68)] hover:text-[#101214]',
   },
   plain: {
     active: ACTIVE_TEXT,
-    inactive: 'text-gray-950 hover:text-(--primary)',
+    inactive: 'text-[#101214] hover:text-(--primary)',
   },
 };
 
@@ -81,14 +82,14 @@ export function SideNavItem({
           <span
             className={cn(
               'w-5 h-5 p-0.5 inline-flex items-center justify-center rounded',
-              isActive ? 'bg-(--primary)' : 'bg-gray-400',
+              isActive ? 'bg-(--primary)' : 'bg-[rgba(16,18,20,0.36)]',
             )}
           >
             <Icon
               icon={page.icon}
               iconLibrary="lucide"
               className={cn(
-                isActive ? 'bg-white' : 'bg-gray-600 group-hover:bg-white',
+                isActive ? 'bg-white' : 'bg-[rgba(16,18,20,0.6)] group-hover:bg-white',
               )}
               overrideColor
               size={12}
@@ -97,7 +98,7 @@ export function SideNavItem({
         )}
         <span className="flex-1 truncate min-w-0">{title}</span>
         {page.deprecated && (
-          <span className="shrink-0 text-xs font-medium px-2 py-0.5 rounded-md bg-gray-100 text-gray-600">
+          <span className="shrink-0 text-xs font-medium px-2 py-0.5 rounded-md bg-[rgba(16,18,20,0.06)] text-[rgba(16,18,20,0.58)]">
             Deprecated
           </span>
         )}

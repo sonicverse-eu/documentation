@@ -53,7 +53,7 @@ const page = resolvePageData(docsConfig as DocsConfig, {
       client:load
     />
 
-    <div class="w-full px-4 pt-3 lg:pt-0">
+    <div class="quiet-grid w-full px-4 pt-3 lg:pt-0">
       <div
         class="flex lg:gap-10 min-h-[calc(100vh-4rem)]"
         style="container-type: inline-size;"
@@ -72,7 +72,7 @@ const page = resolvePageData(docsConfig as DocsConfig, {
             <header class="leading-none pb-8">
               {
                 page.groupName && (
-                  <p class="text-sm font-semibold text-(--primary) mt-0.5">
+                  <p class="text-sm font-semibold text-(--primary) mt-0.5 tracking-[0.08em] uppercase">
                     {page.groupName}
                   </p>
                 )
@@ -82,7 +82,7 @@ const page = resolvePageData(docsConfig as DocsConfig, {
               >
                 <div class="flex flex-col gap-2.5">
                   <h1
-                    class="text-2xl sm:text-3xl text-gray-900 tracking-tight font-bold wrap-anywhere"
+                    class="text-2xl sm:text-3xl text-[#101214] tracking-normal font-bold wrap-anywhere"
                   >
                     {doc.data.title || doc.id}
                   </h1>
