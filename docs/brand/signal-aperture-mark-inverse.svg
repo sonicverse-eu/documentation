@@ -1,7 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 128" role="img" aria-labelledby="title">
-  <title id="title">Sonicverse logo lockup</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Sonicverse Signal Aperture inverse mark</title>
   <rect width="128" height="128" rx="10" fill="#f6f7f8"/>
   <path d="M30 26h24v10H40v14H30V26Zm44 0h24v24H88V36H74V26ZM30 78h10v14h14v10H30V78Zm58 0h10v24H74V92h14V78Z" fill="#090a0c"/>
   <path d="M24 64h27l7-16 13 32 9-16h24" fill="none" stroke="#b51f2e" stroke-width="9" stroke-linecap="square" stroke-linejoin="miter"/>
-  <text x="164" y="82" fill="#f6f7f8" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700" letter-spacing="0">Sonicverse</text>
 </svg>

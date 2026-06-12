@@ -1,9 +1,9 @@
 ---
-title: "Customize your site"
-description: "Understand what docs.json controls and how to style your custom frontend"
+title: "Customize the docs"
+description: "Understand what docs.json controls and how the Sonicverse docs shell is styled"
 ---
 
-This starter uses a custom Astro frontend with Mintlify's content tools and components. Because the frontend is yours, not every `docs.json` configuration option from the [full Mintlify reference](https://mintlify.com/docs/organize/settings) applies.
+This site uses a custom Astro frontend with Mintlify content tools and components. Because Sonicverse owns the frontend, not every `docs.json` configuration option from the [full Mintlify reference](https://mintlify.com/docs/organize/settings) applies.
 
 **What `docs.json` controls:** Navigation structure, page metadata, and content configuration.
 
@@ -42,11 +42,11 @@ Page paths are relative to the `docs/` directory without the `.mdx` extension. U
 
 ## Site metadata
 
-Set a site name and other metadata in `docs.json`.
+Set the site name and other metadata in `docs.json`.
 
 ```json docs/docs.json
 {
-  "name": "My Docs",
+  "name": "Sonicverse Docs",
   "favicon": "/favicon.svg",
   "logo": {
     "light": "/logo/light.svg",
@@ -59,7 +59,7 @@ Whether these values take effect depends on how the Astro templates in `src/` re
 
 ## Styling and layouts
 
-Since this is a custom Astro project, you have direct control over how your site looks:
+Since this is a custom Astro project, the Sonicverse visual system lives in source:
 
 | Path | What it controls |
 |------|-----------------|

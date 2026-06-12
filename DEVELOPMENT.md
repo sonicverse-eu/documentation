@@ -1,81 +1,56 @@
 # Development Guide
 
-This guide covers how to set up and work on the Mintlify Astro Starter locally.
-
-## Prerequisites
-
-- [Node.js](https://nodejs.org/) >= 20.0.0
-- [npm](https://www.npmjs.com/) >= 10.0.0
+This guide covers local development for the Sonicverse documentation site.
 
 ## Getting Started
 
-1. Clone the repository:
+Install dependencies from the lockfile:
 
 ```bash
-git clone https://github.com/mintlify/mintlify-astro-starter.git
-cd mintlify-astro-starter
+npm ci
 ```
 
-2. Install dependencies:
-
-```bash
-npm install
-```
-
-3. Create a `.env` file from the example:
+Create a local environment file when search, assistant, or canonical URLs are needed:
 
 ```bash
 cp .env.example .env
 ```
 
-4. Fill in your Mintlify credentials in `.env`:
-
-```
-PUBLIC_MINTLIFY_ASSISTANT_KEY=your_assistant_key
-PUBLIC_MINTLIFY_SUBDOMAIN=your_subdomain
-```
-
-5. Start the dev server:
+Start the Astro development server:
 
 ```bash
 npm run dev
 ```
 
-The site will be available at `http://localhost:4321`.
+The site is available at `http://localhost:4321` by default.
 
-## Available Scripts
+## Scripts
 
-| Command            | Description                          |
-| ------------------ | ------------------------------------ |
-| `npm run dev`      | Start the development server         |
-| `npm run build`    | Build the site for production        |
-| `npm run preview`  | Preview the production build locally |
-| `npm run format`   | Format code with Prettier            |
-| `npm run lint`     | Run ESLint                           |
-| `npm run lint:fix` | Run ESLint with auto-fix             |
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the development server. |
+| `npm run build` | Build the static site into `dist/`. |
+| `npm run preview` | Preview the production build locally. |
+| `npm run lint` | Run ESLint. |
+| `npm run format` | Format the repository with Prettier. |
 
-## Project Structure
+## Content
 
+Documentation pages live in `docs/` as MDX files. Navigation and public docs metadata live in `docs/docs.json`.
+
+## Branding
+
+Sonicverse brand assets live in `docs/brand/` and `docs/logo/`. The shared light documentation palette is defined in `src/styles/global.css`.
+
+## Vercel
+
+Vercel uses `vercel.json`:
+
+```json
+{
+  "framework": "astro",
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
+}
 ```
-├── docs/                # Documentation content (MDX pages, images, config)
-│   ├── docs.json        # Navigation and site configuration
-│   ├── index.mdx        # Homepage
-│   └── ...
-├── src/
-│   ├── components/      # React and Astro components
-│   ├── hooks/           # Custom React hooks
-│   ├── icons/           # SVG icon components
-│   ├── layouts/         # Astro layout templates
-│   ├── pages/           # Astro page routes
-│   ├── styles/          # Global CSS and Tailwind styles
-│   └── utils/           # Utility functions
-├── astro.config.mjs     # Astro configuration
-├── tsconfig.json        # TypeScript configuration
-└── package.json
-```
-
-## Customizing Content
-
-Documentation pages live in the `docs/` directory as MDX files. Site navigation and metadata are configured in `docs/docs.json`.
-
-See the [Mintlify documentation](https://mintlify.com/docs) for details on available components and configuration options.

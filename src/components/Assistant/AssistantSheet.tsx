@@ -131,7 +131,7 @@ function AssistantSheetClient() {
     if (isMobile) {
       return 'fixed inset-0 z-[100]';
     }
-    return cn('sticky top-0 h-screen shrink-0 z-[50]', 'bg-white');
+    return cn('sticky top-0 h-screen shrink-0 z-[50]', 'bg-[#fbfbfa]');
   };
 
   const sheetContent = (
@@ -163,8 +163,8 @@ function AssistantSheetClient() {
         className={cn(
           'flex flex-col overflow-hidden shrink-0',
           isMobile
-            ? 'overscroll-contain bg-white z-10'
-            : 'h-full bg-white border-l border-gray-200',
+            ? 'overscroll-contain bg-[#fbfbfa] z-10'
+            : 'h-full bg-[#fbfbfa] border-l border-[rgba(16,18,20,0.1)]',
           isMobile &&
             !isDragging &&
             'transition-transform duration-200 ease-out',
@@ -189,7 +189,7 @@ function AssistantSheetClient() {
       >
         {isMobile && (
           <div className="flex justify-center pt-3 touch-none">
-            <div className="w-10 h-1 rounded-full bg-gray-300" />
+            <div className="w-10 h-1 rounded-full bg-[rgba(16,18,20,0.18)]" />
           </div>
         )}
         <div
@@ -206,17 +206,17 @@ function AssistantSheetClient() {
                 color="var(--primary)"
                 size={20}
               />
-              <span className="font-medium text-gray-900">Assistant</span>
+              <span className="font-medium text-[#101214]">Assistant</span>
             </div>
 
             <div className="flex items-center gap-1">
               {!isMobile && (
                 <button
                   onClick={toggleMaximize}
-                  className="group size-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+                  className="group size-8 flex items-center justify-center hover:bg-[rgba(16,18,20,0.045)] rounded-md transition-colors"
                   aria-label={isMaximized ? 'Minimize' : 'Maximize'}
                 >
-                  <span className="flex items-center justify-center text-gray-500 group-hover:text-gray-700 transition-colors">
+                  <span className="flex items-center justify-center text-[rgba(16,18,20,0.5)] group-hover:text-[#101214] transition-colors">
                     {isMaximized ? (
                       <Icon
                         icon="minimize-2"
@@ -238,10 +238,10 @@ function AssistantSheetClient() {
               {messages.length > 0 && (
                 <button
                   onClick={onClear}
-                  className="group size-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+                  className="group size-8 flex items-center justify-center hover:bg-[rgba(16,18,20,0.045)] rounded-md transition-colors"
                   aria-label="Clear chat"
                 >
-                  <span className="flex items-center justify-center text-gray-500 group-hover:text-gray-700 transition-colors">
+                  <span className="flex items-center justify-center text-[rgba(16,18,20,0.5)] group-hover:text-[#101214] transition-colors">
                     <Icon
                       icon="trash"
                       iconLibrary="lucide"
@@ -253,10 +253,10 @@ function AssistantSheetClient() {
               )}
               <button
                 onClick={handleClose}
-                className="group size-8 flex items-center justify-center hover:bg-gray-100 rounded-lg transition-colors"
+                className="group size-8 flex items-center justify-center hover:bg-[rgba(16,18,20,0.045)] rounded-md transition-colors"
                 aria-label="Close"
               >
-                <span className="flex items-center justify-center text-gray-500 group-hover:text-gray-700 transition-colors">
+                <span className="flex items-center justify-center text-[rgba(16,18,20,0.5)] group-hover:text-[#101214] transition-colors">
                   <Icon
                     icon="x"
                     iconLibrary="lucide"
@@ -286,7 +286,7 @@ function AssistantSheetClient() {
             <div ref={topBoundaryRef} className="h-px w-full shrink-0" />
           </div>
 
-          <div className="px-4 pb-4 shrink-0 border-t border-gray-100 pt-4">
+          <div className="px-4 pb-4 shrink-0 border-t border-[rgba(16,18,20,0.08)] pt-4">
             <AssistantTextArea
               value={input}
               onChange={setInput}

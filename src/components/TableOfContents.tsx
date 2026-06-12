@@ -65,7 +65,7 @@ export default function TableOfContents({
         <nav className="overflow-y-auto text-sm leading-6 pt-2 pb-8">
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}
-            className="font-medium text-gray-900 mb-3 flex items-center gap-2 cursor-pointer hover:text-gray-600 transition-colors"
+            className="font-medium text-[#101214] mb-3 flex items-center gap-2 cursor-pointer hover:text-[rgba(16,18,20,0.62)] transition-colors"
           >
             <LinesIcon />
             <span>On this page</span>
@@ -83,7 +83,7 @@ export default function TableOfContents({
                       heading.depth > 2 ? 'pl-4' : 'pl-0',
                       isActive
                         ? 'font-medium text-(--primary)'
-                        : 'text-gray-500 hover:text-gray-900',
+                        : 'text-[rgba(16,18,20,0.5)] hover:text-[#101214]',
                     )}
                   >
                     {heading.text}

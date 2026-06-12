@@ -7,19 +7,19 @@ export function MobileActionButtons() {
     <div className="flex lg:hidden items-center gap-2">
       <button
         type="button"
-        className="text-gray-500 w-8 h-8 flex items-center justify-center hover:text-gray-600"
+        className="text-[rgba(16,18,20,0.58)] w-8 h-8 flex items-center justify-center rounded-md hover:bg-[rgba(16,18,20,0.045)] hover:text-[#101214]"
         onClick={openSearch}
         aria-label="Search"
       >
-        <Icon icon="search" iconLibrary="lucide" size={16} color="dimgray" />
+        <Icon icon="search" iconLibrary="lucide" size={16} color="currentColor" />
       </button>
       <button
         type="button"
-        className="text-gray-500 w-8 h-8 flex items-center justify-center hover:text-gray-600"
+        className="text-[rgba(16,18,20,0.58)] w-8 h-8 flex items-center justify-center rounded-md hover:bg-[rgba(16,18,20,0.045)] hover:text-[#101214]"
         onClick={toggleAssistant}
         aria-label="AI Assistant"
       >
-        <Icon icon="sparkles" iconLibrary="lucide" size={16} color="dimgray" />
+        <Icon icon="sparkles" iconLibrary="lucide" size={16} color="currentColor" />
       </button>
     </div>
   );
@@ -42,7 +42,7 @@ export function MobileNavToggle({
       className="flex items-center h-14 py-4 lg:px-[5vw] lg:hidden focus:outline-0 w-full text-left"
       onClick={handleToggle}
     >
-      <div className="flex items-center text-gray-500 hover:text-gray-600">
+      <div className="flex items-center text-[rgba(16,18,20,0.58)] hover:text-[#101214]">
         <span className="sr-only">Navigation</span>
         <Icon icon="menu" iconLibrary="lucide" size={18} />
       </div>
@@ -54,11 +54,11 @@ export function MobileNavToggle({
               icon="chevron-right"
               iconLibrary="lucide"
               size={16}
-              className="text-gray-400"
+              className="text-[rgba(16,18,20,0.36)]"
             />
           </div>
         )}
-        <div className="font-semibold text-gray-900 truncate min-w-0 flex-1">
+        <div className="font-semibold text-[#101214] truncate min-w-0 flex-1">
           {pageTitle}
         </div>
       </div>
