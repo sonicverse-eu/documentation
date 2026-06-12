@@ -47,12 +47,12 @@ export function AssistantTextArea({
         placeholder="Ask a question..."
         rows={2}
         className={cn(
-          'w-full py-3 pr-10 pl-3 rounded-xl resize-none outline-none',
+          'w-full py-3 pr-10 pl-3 rounded-md resize-none outline-none',
           isMobile ? 'text-base' : 'text-sm',
-          'border border-gray-200',
-          'bg-white',
-          'text-gray-900',
-          'placeholder:text-gray-400',
+          'border border-[rgba(16,18,20,0.12)]',
+          'bg-white/92',
+          'text-[#101214]',
+          'placeholder:text-[rgba(16,18,20,0.4)]',
           'focus:ring-2 min-h-[48px] transition-shadow',
         )}
         style={
@@ -75,7 +75,7 @@ export function AssistantTextArea({
         onClick={onSubmit}
         disabled={disabled}
         className={cn(
-          'absolute right-2 bottom-3 w-6 h-6 rounded-full flex items-center justify-center transition-all text-white',
+          'absolute right-2 bottom-3 w-6 h-6 rounded-md flex items-center justify-center transition-all text-white',
           disabled
             ? 'cursor-not-allowed'
             : 'hover:brightness-90 cursor-pointer',

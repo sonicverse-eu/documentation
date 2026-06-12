@@ -53,7 +53,7 @@ export function MobileSidebar({
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-60 lg:hidden"
+          className="fixed inset-0 bg-[#101214]/24 backdrop-blur-sm z-60 lg:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -62,7 +62,7 @@ export function MobileSidebar({
         <button
           type="button"
           onClick={() => setIsOpen(false)}
-          className="fixed bg-white rounded-full top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-600 shadow-md z-80 lg:hidden"
+          className="fixed bg-white rounded-md top-4 right-4 w-8 h-8 flex items-center justify-center text-[rgba(16,18,20,0.58)] hover:text-[#101214] shadow-md z-80 lg:hidden"
           aria-label="Close navigation"
         >
           <Icon icon="x" iconLibrary="lucide" size={18} />
@@ -71,7 +71,7 @@ export function MobileSidebar({
 
       <div
         className={cn(
-          'fixed top-0 left-0 bottom-0 w-[20rem] bg-white z-70 transition-transform duration-300 ease-in-out lg:hidden',
+          'fixed top-0 left-0 bottom-0 w-[20rem] bg-[#fbfbfa] z-70 transition-transform duration-300 ease-in-out lg:hidden border-r border-[rgba(16,18,20,0.12)]',
           isOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
@@ -79,8 +79,8 @@ export function MobileSidebar({
           <div className="flex items-center justify-between px-4 pt-6 pb-4">
             <img
               src="/logo/light.svg"
-              alt="Mint Starter Kit"
-              className="h-7 w-auto"
+              alt="Sonicverse Docs"
+              className="h-8 w-auto"
             />
           </div>
 
