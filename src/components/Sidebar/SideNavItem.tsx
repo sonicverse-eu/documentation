@@ -1,6 +1,6 @@
 import { cn, Icon } from '@mintlify/components';
-import type { NavPage } from '@mintlify/astro/helpers';
 import type { SidebarItemStyle } from './types';
+import type { NavPage } from './nav';
 
 export interface SideNavItemProps {
   page: NavPage;

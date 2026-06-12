@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { cn, Icon } from '@mintlify/components';
-import type { NavNode, TabInfo } from '@mintlify/astro/helpers';
-import { unwrapNav } from '@mintlify/astro/helpers';
 import { type SidebarItemStyle, type AnchorItem } from './types';
 import { SidebarEntries } from './SidebarEntries';
 import { Anchors } from './Anchors';
 import { TabsDropdown } from './TabsDropdown';
+import type { NavNode, TabInfo } from './nav';
+import { unwrapNav } from './nav';
 
 interface MobileSidebarProps {
   navigation: NavNode;
