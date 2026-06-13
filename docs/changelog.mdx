@@ -1,0 +1,26 @@
+---
+title: "Changelog"
+description: "Product updates across the Sonicverse open broadcast stack"
+---
+
+## June 12, 2026
+
+### Audio streaming stack
+
+<Update label="New features">
+  **Unified runtime image.** The streaming services now ship as a single consolidated Docker image managed by one container entrypoint. Fewer moving parts to deploy, simpler upgrades, and a smaller surface to monitor when running a station. See [sonicverse.tech](https://sonicverse.tech) for project overview.
+</Update>
+
+<Update label="Updates">
+  **Analytics integration removed.** The optional PostHog analytics layer has been pulled out of the stack. Operators no longer need to configure analytics environment variables, and listener traffic is not tracked by default.
+</Update>
+
+<Update label="Bug fixes">
+  - **Status API now starts reliably** inside the unified container, so the operator dashboard and service health checks come up consistently on first boot.
+</Update>
+
+### Website
+
+<Update label="New features">
+  **Rebrand around the open broadcast stack.** The Sonicverse marketing site has been rebuilt around the open broadcast stack story, with refreshed messaging, a new [open source](https://sonicverse.tech/open-source) section, and an updated [roadmap](https://sonicverse.tech/roadmap).
+</Update>
