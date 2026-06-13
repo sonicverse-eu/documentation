@@ -1,0 +1,114 @@
+---
+title: "Configuration"
+description: "Environment variables that control the unified Sonicverse runtime image."
+---
+
+All runtime configuration lives in a single `.env` file at the repository root. The unified container reads it on startup, renders Icecast and nginx configs, and starts the streaming pipeline. There are no other config files you need to edit for a standard deployment.
+
+Copy the template to get started:
+
+```bash
+cp .env.example .env
+```
+
+## Required — station identity
+
+| Variable | Description |
+|---|---|
+| `STATION_NAME` | Station name. Surfaced in stream metadata and the default landing page. |
+| `STATION_LOCATION` | Free-form location string published in Icecast server info. |
+| `STATION_ADMIN_EMAIL` | Contact email for listeners and Icecast server info. |
+
+## Required — Icecast distribution
+
+| Variable | Description |
+|---|---|
+| `ICECAST_HOSTNAME` | Public hostname your listeners use. Also used for TLS certificate provisioning. |
+| `ICECAST_SOURCE_PASSWORD` | Password Liquidsoap uses to connect to Icecast as a source client. |
+| `ICECAST_RELAY_PASSWORD` | Password for any Icecast relays. |
+| `ICECAST_ADMIN_USER` | Icecast admin username. Also used by the status API. |
+| `ICECAST_ADMIN_PASSWORD` | Icecast admin password. Also used by the status API. |
+| `ICECAST_MAX_LISTENERS` | Maximum concurrent listeners across all mounts. Defaults to `500`. |
+
+<Warning>
+  `ICECAST_ADMIN_USER` and `ICECAST_ADMIN_PASSWORD` are required when the status panel is enabled. They no longer fall back to the previous built-in example credentials — set them explicitly.
+</Warning>
+
+## Required — Liquidsoap harbor (studio input)
+
+| Variable | Description |
+|---|---|
+| `HARBOR_PRIMARY_PORT` | TCP port for the primary studio input. Default `8010`. |
+| `HARBOR_FALLBACK_PORT` | TCP port for the fallback studio input. Default `8011`. |
+| `HARBOR_PASSWORD` | Password your studio encoder uses to connect. |
+| `SILENCE_THRESHOLD_DB` | Silence detection threshold in dB. Default `-40`. |
+| `SILENCE_DURATION` | Seconds of silence before Liquidsoap fails over to the next source. Default `15`. |
+
+## Required — TLS
+
+| Variable | Description |
+|---|---|
+| `LETSENCRYPT_EMAIL` | Email address for Let's Encrypt expiry and policy notifications. |
+| `LETSENCRYPT_STAGING` | Set to `1` to use the Let's Encrypt staging endpoint during initial testing. Set to `0` for production certificates. |
+
+## Optional — status panel and dashboard
+
+The status panel is opt-in. Set `ENABLE_STATUS_PANEL=1` to start the internal Flask status API process and expose `/api/` through nginx.
+
+| Variable | Description |
+|---|---|
+| `ENABLE_STATUS_PANEL` | `1` to expose the status API. Default `0`. |
+| `APPWRITE_ENDPOINT` | Appwrite API endpoint for dashboard auth. Recommended: `https://cloud.appwrite.io/v1`. |
+| `APPWRITE_PROJECT_ID` | Appwrite project ID. Required when using the dashboard. |
+| `APPWRITE_TEAM_ID` | Appwrite team ID. Required when `APPWRITE_PROJECT_ID` is set — only team members get panel access. |
+| `STATUS_PANEL_CORS_ORIGIN` | Comma-separated list of dashboard origins permitted to call `/api/`. |
+| `STATUS_PANEL_HOST` | Bind address for the status API. Defaults to `127.0.0.1` on bare-metal; the container picks its own IP automatically when unset. |
+| `STATUS_PANEL_WRITE_ROLES` | Comma-separated Appwrite team roles allowed to modify emergency audio. Default `owner,admin`. |
+| `STATUS_PANEL_ALLOW_RISKY_COMMANDS` | `1` to allow remote restart and SSL renewal commands from the panel. Default `0`. |
+
+### Enabling the panel after the stack is already running
+
+If you set `ENABLE_STATUS_PANEL=1` after `docker compose up -d` has already run, recreate the app container so nginx picks up the `/api/` route:
+
+```bash
+docker compose up -d --force-recreate app
+```
+
+The supervisor inside the container starts the status API process and waits for it to bind before starting nginx, so `/api/` is ready as soon as the container is healthy.
+
+## Example `.env` for a minimal production deployment
+
+```bash
+# Identity
+STATION_NAME="My Radio"
+STATION_LOCATION="Rotterdam, NL"
+STATION_ADMIN_EMAIL=admin@example.com
+
+# Icecast
+ICECAST_HOSTNAME=stream.example.com
+ICECAST_SOURCE_PASSWORD=replace-with-strong-password
+ICECAST_RELAY_PASSWORD=replace-with-strong-password
+ICECAST_ADMIN_USER=admin
+ICECAST_ADMIN_PASSWORD=replace-with-strong-password
+ICECAST_MAX_LISTENERS=500
+
+# Harbor (studio input)
+HARBOR_PRIMARY_PORT=8010
+HARBOR_FALLBACK_PORT=8011
+HARBOR_PASSWORD=replace-with-strong-password
+SILENCE_THRESHOLD_DB=-40
+SILENCE_DURATION=15
+
+# TLS
+LETSENCRYPT_EMAIL=admin@example.com
+LETSENCRYPT_STAGING=0
+
+# Status panel — disabled
+ENABLE_STATUS_PANEL=0
+```
+
+After editing `.env`, apply the changes:
+
+```bash
+docker compose up -d --force-recreate app
+```

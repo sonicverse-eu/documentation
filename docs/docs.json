@@ -14,7 +14,11 @@
         "groups": [
           {
             "group": "Getting started",
-            "pages": ["index"]
+            "pages": ["index", "installation", "configuration"]
+          },
+          {
+            "group": "Architecture",
+            "pages": ["architecture/unified-image"]
           }
         ]
       }

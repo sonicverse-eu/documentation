@@ -1,0 +1,124 @@
+---
+title: "Installation"
+description: "Deploy the Sonicverse audio streaming stack on a Linux host using the unified Docker image."
+---
+
+<Note>
+  Sonicverse is in early development. Don't run this in production without thorough evaluation.
+</Note>
+
+## Prerequisites
+
+Before you start, make sure you have:
+
+- A Linux host (Ubuntu/Debian recommended) with a public IP and a DNS A record pointing to it.
+- Ports `80`, `443`, `8010`, and `8011` reachable from the internet (or at minimum from your studio encoder for the last two).
+- Docker Engine 24+ and the Docker Compose plugin. The installer can install Docker for you on Debian-family hosts.
+- An MP3 file to use as the emergency fallback (any short loop works).
+
+Choose the path that matches your situation.
+
+## Option 1 — One-liner install (fastest)
+
+Use this when you want a working stream on a fresh server with minimum typing. The script clones the repository, checks prerequisites, generates passwords, and brings the stack up using the pre-built unified image.
+
+```bash
+bash <(curl -fsSL https://sonicverse.short.gy/install-audiostack)
+```
+
+The installer runs interactively and asks for:
+
+- `ICECAST_HOSTNAME` — the public hostname listeners will use.
+- `LETSENCRYPT_EMAIL` — used for certificate expiry notifications.
+- `STATION_NAME`, `STATION_LOCATION`, `STATION_ADMIN_EMAIL` — stream metadata.
+
+Everything else is auto-generated into `.env`. Typical runtime is 2–5 minutes, mostly spent pulling the unified image.
+
+## Option 2 — Clone and install
+
+Use this when you want to read the source before running it, or when you'll commit local changes alongside `.env`.
+
+```bash
+git clone https://github.com/sonicverse-eu/audiostreaming-stack.git
+cd audiostreaming-stack
+./install.sh
+```
+
+Add `--dev` if you also want the Node.js and Python toolchains needed to edit the dashboard or status API locally. Add `--build-local` to build the unified image from source instead of pulling it.
+
+## Option 3 — Manual setup
+
+Use this when you're integrating Sonicverse into existing infrastructure (a custom reverse proxy, Ansible, Nomad, etc.) and want full control.
+
+<Steps>
+  <Step title="Clone and configure">
+    ```bash
+    git clone https://github.com/sonicverse-eu/audiostreaming-stack.git
+    cd audiostreaming-stack
+    cp .env.example .env
+    ```
+
+    Edit `.env` and set at least `ICECAST_HOSTNAME`, `LETSENCRYPT_EMAIL`, and all `ICECAST_*` and `HARBOR_*` passwords. See [Configuration](/configuration) for the full reference.
+  </Step>
+  <Step title="Add an emergency audio file">
+    ```bash
+    mkdir -p emergency-audio
+    cp /path/to/your/fallback.mp3 emergency-audio/fallback.mp3
+    ```
+
+    Liquidsoap plays this file when both studio inputs go silent. Without it, the fallback chain has no final step.
+  </Step>
+  <Step title="Obtain the SSL certificate">
+    ```bash
+    ./init-letsencrypt.sh
+    ```
+
+    The script reuses the running `app` container when it's already up, or spins up a temporary ACME-only nginx for the HTTP-01 challenge on first install.
+  </Step>
+  <Step title="Start the stack">
+    ```bash
+    docker compose up -d
+    ```
+
+    The unified `app` container starts Icecast, Liquidsoap, nginx, and (optionally) the status API in one supervised process tree. See [Unified runtime image](/architecture/unified-image) for the startup order.
+  </Step>
+  <Step title="Connect your studio encoder">
+    Configure BUTT or any Icecast source client with:
+
+    - Primary: host `<server>`, port `8010`, mount `/primary`, password `HARBOR_PASSWORD`, MIME `audio/mpeg`, 320 kbps MP3 CBR.
+    - Fallback: host `<server>`, port `8011`, mount `/secondary`, password `HARBOR_PASSWORD`, MIME `audio/mpeg`, 192 kbps MP3 CBR.
+  </Step>
+  <Step title="Verify">
+    - Open `https://<host>/listen/stream-mp3-128` in VLC.
+    - Open `https://<host>/hls/live.m3u8` in Safari or VLC for HLS playback.
+    - Visit `https://<host>/icecast-admin/` for the Icecast admin UI.
+  </Step>
+</Steps>
+
+## Firewall
+
+Open these ports on the host:
+
+| Port | Purpose |
+|---|---|
+| 80 | HTTP (Let's Encrypt ACME challenge + redirect to HTTPS) |
+| 443 | HTTPS — listener streams, HLS, admin UI |
+| 8010 | Liquidsoap harbor — primary studio input |
+| 8011 | Liquidsoap harbor — fallback studio input |
+
+The repository ships a `setup-firewall.sh` helper for UFW. Restrict the studio ports to your studio's static IP whenever possible:
+
+```bash
+sudo ./setup-firewall.sh --studio-ip 203.0.113.50
+```
+
+## Upgrading
+
+The unified image means upgrading is a single pull and recreate:
+
+```bash
+docker compose pull app
+docker compose up -d
+```
+
+The supervisor inside the container shuts every process down cleanly on `SIGTERM`, so the rolling restart only drops listeners for the duration of one nginx restart (typically under a second). Plan upgrades during low-traffic windows anyway, since listener clients reconnect rather than seamlessly resume.

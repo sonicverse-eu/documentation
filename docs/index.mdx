@@ -1,31 +1,48 @@
 ---
-title: "Coming soon"
-description: "The Sonicverse documentation is on its way"
+title: "Welcome to Sonicverse"
+description: "The open broadcast stack for self-hosted live radio."
 ---
 
-## Documentation coming soon
+Sonicverse is a self-hosted Docker stack for live radio streaming. Ingest from any studio encoder, deliver MP3, AAC, Ogg, and HLS to listeners, and run an optional real-time operator dashboard. The runtime now ships as a single consolidated Docker image managed by one supervised entrypoint.
 
-We're putting the finishing touches on the Sonicverse documentation. Check back shortly for guides, references, and tutorials covering the full open broadcast stack.
+<Note>
+  Sonicverse is in early development. APIs, configuration, and behaviour may change without notice. Don't run this in production without thorough evaluation.
+</Note>
 
-In the meantime, visit [sonicverse.tech](https://sonicverse.tech) to learn more about the project.
+## Start here
+
+<Columns cols={2}>
+  <Card title="Installation" icon="rocket" href="/installation">
+    Deploy the stack in 2–5 minutes with the one-liner installer, or set it up manually.
+  </Card>
+  <Card title="Configuration" icon="sliders" href="/configuration">
+    Every environment variable the unified image reads, with examples for a minimal production deployment.
+  </Card>
+  <Card title="Unified runtime image" icon="box" href="/architecture/unified-image">
+    How Liquidsoap, Icecast, nginx, and the status API run together in one container.
+  </Card>
+  <Card title="Source on GitHub" icon="github" href="https://github.com/sonicverse-eu/audiostreaming-stack">
+    Read the code, file issues, and follow development on GitHub.
+  </Card>
+</Columns>
+
+## What you get
+
+- **Studio ingest** on two harbor ports (`8010` primary, `8011` fallback) with automatic silence detection and failover to a local emergency MP3.
+- **Listener distribution** via Icecast2 in MP3 (128/192/320 kbps), AAC (128/192 kbps), and Ogg Vorbis (128 kbps).
+- **HLS adaptive bitrate** at `/hls/live.m3u8` for mobile and browser players.
+- **Automatic TLS** via Let's Encrypt with hot reload — no downtime on renewal.
+- **Optional operator dashboard** with live listener counts, container health, and emergency audio management, secured by Appwrite team-based auth.
 
 ## Sponsorships
 
 Sonicverse documentation is made possible thanks to our sponsors:
 
 <Columns cols={2}>
-  <Card
-    title="Mintlify"
-    icon="book"
-    href="https://mintlify.com"
-  >
+  <Card title="Mintlify" icon="book" href="https://mintlify.com">
     For powering this documentation site.
   </Card>
-  <Card
-    title="Greptile"
-    icon="code"
-    href="https://greptile.com"
-  >
+  <Card title="Greptile" icon="code" href="https://greptile.com">
     For supporting open development of Sonicverse.
   </Card>
 </Columns>

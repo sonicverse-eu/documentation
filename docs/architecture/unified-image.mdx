@@ -1,0 +1,91 @@
+---
+title: "Unified runtime image"
+description: "How the consolidated Sonicverse Docker image runs Liquidsoap, Icecast2, nginx, and the status API in a single container."
+---
+
+<Note>
+  Sonicverse is in early development. APIs, configuration keys, and runtime behaviour may change without notice. Don't run this in production without thorough evaluation.
+</Note>
+
+## Overview
+
+Sonicverse now ships its runtime services as **one consolidated Docker image** managed by a single supervised entrypoint. Liquidsoap (stream processor), Icecast2 (distribution), nginx (TLS termination and HLS serving), and the optional status API all run inside the same container.
+
+Use this page if you're upgrading from an earlier multi-container deployment, building deployment automation, or debugging why a process isn't starting.
+
+## What's in the image
+
+| Process | Role | Started by |
+|---|---|---|
+| Liquidsoap | Ingests studio MP3 streams on the harbor, runs the fallback chain, encodes outputs, and produces HLS segments | Entrypoint |
+| Icecast2 | Distributes MP3, AAC, and Ogg mount points to listeners | Entrypoint |
+| nginx | Public-facing TLS, HTTP-to-HTTPS redirect, `/listen/`, `/hls/`, `/icecast-admin/`, optional `/api/` | Entrypoint |
+| Status API (Flask) | Optional internal HTTP API behind nginx; powers the operator dashboard | Entrypoint, only when `ENABLE_STATUS_PANEL=1` |
+| Certbot | Renews Let's Encrypt certificates and signals nginx to reload | Sidecar container in `docker-compose.yml` |
+
+The supervisor script is `scripts/unified-entrypoint.sh`. It renders templated config (Icecast XML, nginx config, landing page), starts each enabled process, watches for new TLS certificates, and shuts everything down cleanly on `SIGTERM`.
+
+## Why a single image
+
+The previous layout used separate `liquidsoap`, `icecast`, `nginx`, `analytics`, and `status-api` images glued together with `docker-compose`. Consolidating them:
+
+- Removes inter-container network hops between Liquidsoap, Icecast, and nginx.
+- Cuts cold-start time and image-pull bandwidth (one image instead of four).
+- Lets the entrypoint coordinate process order — for example, waiting for the status API to be ready before nginx accepts `/api/` traffic.
+- Simplifies host-level firewalling: only the app container needs ports `80`, `443`, `8010`, and `8011`.
+
+The Docker socket is **not** mounted into the app container, so a compromise inside the streaming processes cannot escape to the host.
+
+## Process startup order
+
+The entrypoint starts services in this order so that nginx never proxies to a process that isn't listening yet:
+
+1. Render templated configs from environment variables (`ICECAST_HOSTNAME`, `STATION_NAME`, etc.).
+2. Start **Icecast2** on the internal loopback.
+3. Start **Liquidsoap**, which connects to Icecast as a source client and exposes the harbor on `8010` / `8011`.
+4. If `ENABLE_STATUS_PANEL=1`, start the **status API** and wait for it to bind before continuing.
+5. Start **nginx**, which now has every upstream available.
+6. Enter a watch loop for certificate renewals.
+
+If you see `502` responses on `/api/` immediately after startup, you're running an older image — upgrade past the fix that waits for the status API before nginx.
+
+## Published images
+
+| Registry | Image | Tag |
+|---|---|---|
+| Docker Hub (primary) | `docker.io/sonicverse/audiostreaming-stack` | `latest` |
+| GHCR (mirror) | `ghcr.io/sonicverse-eu/audiostreaming-stack` | `latest` |
+
+Both registries publish multi-arch images for `linux/amd64` and `linux/arm64`.
+
+## Pulling and running directly
+
+You normally start the stack with `docker compose up -d`, but you can pull the image on its own for inspection:
+
+```bash
+docker pull docker.io/sonicverse/audiostreaming-stack:latest
+
+docker run --rm -it \
+  --entrypoint /bin/sh \
+  docker.io/sonicverse/audiostreaming-stack:latest \
+  -c "cat /etc/sonicverse/VERSION; ls /usr/local/bin/unified-entrypoint.sh"
+```
+
+For a real deployment use [Installation](/installation) so that `.env`, volumes, and the certbot sidecar are wired up correctly.
+
+## Verifying processes inside the container
+
+Once the stack is running:
+
+```bash
+# List supervised processes
+docker compose exec app ps -ef
+
+# Tail the entrypoint log
+docker compose logs -f app | grep "\[entrypoint\]"
+
+# Check that nginx, Icecast, and Liquidsoap are all listening
+docker compose exec app sh -c "ss -ltnp | grep -E ':(80|443|8000|8010|8011)'"
+```
+
+The `[entrypoint]` prefix is emitted by the supervisor script for every lifecycle event (process start, certificate reload, shutdown), which makes it easy to filter from container logs.
