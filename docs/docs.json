@@ -15,6 +15,10 @@
           {
             "group": "Getting started",
             "pages": ["index"]
+          },
+          {
+            "group": "Changelog",
+            "pages": ["changelog"]
           }
         ]
       }
