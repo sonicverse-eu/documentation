@@ -17,6 +17,10 @@
             "pages": ["index"]
           },
           {
+            "group": "Operators",
+            "pages": ["operators/status-panel"]
+          },
+          {
             "group": "Changelog",
             "pages": ["changelog"]
           }

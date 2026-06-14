@@ -1,0 +1,90 @@
+---
+title: "Status panel"
+description: "Enable the optional status API inside the unified Sonicverse container to monitor stream health, listener counts, and service status."
+---
+
+The status panel is an optional HTTP API that runs alongside Icecast, Liquidsoap, and nginx inside the unified Sonicverse container. It exposes JSON endpoints you can use to monitor stream health, inspect container status, manage emergency audio files, and run a small set of whitelisted operational commands.
+
+Use this guide when you want to:
+
+- Build an operator dashboard on top of your stream.
+- Hook external monitoring into stream and listener metrics.
+- Let trusted team members manage fallback audio or restart services without shell access.
+
+## How it works
+
+The unified container entrypoint starts the status API as a separate process (`gunicorn` on `127.0.0.1:8080`) when `ENABLE_STATUS_PANEL=1`. nginx proxies `/api/*` routes to the API; when the panel is disabled, those routes are stripped from the nginx config at boot.
+
+All write endpoints (uploads, command execution) are gated behind [Appwrite](https://appwrite.io) team-based authentication. When Appwrite is not configured, the API runs in read-only mode and only the public `/api/auth-config` endpoint is reachable.
+
+## Enable the status panel
+
+Add the following to your `.env` file before starting the stack:
+
+```bash
+# Turn the status API on inside the unified container
+ENABLE_STATUS_PANEL=1
+
+# Required for /api/status to talk to Icecast admin
+ICECAST_ADMIN_USER=admin
+ICECAST_ADMIN_PASSWORD=changeme_admin
+
+# Shown in /api/config responses
+STATION_NAME=My Radio Station
+ICECAST_HOSTNAME=stream.example.com
+```
+
+Restart the container. On boot you should see entrypoint logs for `Starting status-api` followed by a readiness check against `http://127.0.0.1:8080/api/auth-config`.
+
+## Configure authentication
+
+Authenticated endpoints require a valid Appwrite JWT in the `Authorization: Bearer <jwt>` header. Configure Appwrite by setting:
+
+| Variable | Description |
+| --- | --- |
+| `APPWRITE_ENDPOINT` | Appwrite API endpoint, for example `https://cloud.appwrite.io/v1`. |
+| `APPWRITE_PROJECT_ID` | Project that owns the dashboard users. |
+| `APPWRITE_TEAM_ID` | Team whose members may access the panel. |
+| `STATUS_PANEL_WRITE_ROLES` | Comma-separated roles allowed to perform write actions. Defaults to `owner,admin`. |
+| `STATUS_PANEL_CORS_ORIGIN` | Comma-separated origins allowed to call the API from a browser. Leave empty when serving the dashboard from the same host. |
+| `STATUS_PANEL_ALLOW_RISKY_COMMANDS` | Set to `1` to expose service restart commands to operators. Defaults to `0`. |
+
+If `APPWRITE_PROJECT_ID` is set, `APPWRITE_TEAM_ID` is also required — panel access is scoped to team membership.
+
+## Endpoints
+
+| Method | Path | Auth | Description |
+| --- | --- | --- | --- |
+| `GET` | `/api/auth-config` | Public | Appwrite endpoint and project ID for the frontend. |
+| `GET` | `/api/status` | Required | Icecast listener counts, source status, and stream health. |
+| `GET` | `/api/config` | Required | Non-sensitive stack configuration (station name, hostname, harbor ports, silence thresholds). |
+| `GET` | `/api/containers` | Required | Docker container status for each service in the stack. |
+| `GET` | `/api/emergency-audio` | Required | List fallback audio files. |
+| `POST` | `/api/emergency-audio/upload` | Operator | Upload or replace a fallback audio file (`.mp3`, `.flac`, `.wav`, `.ogg`, up to 1 GiB). |
+| `POST` | `/api/emergency-audio/delete` | Operator | Remove a fallback audio file. |
+| `GET` | `/api/commands` | Required | List whitelisted commands that can be executed against the stack. |
+| `POST` | `/api/commands/run` | Required | Run a whitelisted command. Risky commands additionally require operator role. |
+
+## Example: read live stream status
+
+After enabling the panel and signing in through Appwrite, fetch a JWT and call `/api/status` from your dashboard:
+
+```bash
+curl -H "Authorization: Bearer $APPWRITE_JWT" \
+  https://stream.example.com/api/status
+```
+
+```json
+{
+  "online": true,
+  "listeners": 42,
+  "peak_listeners": 78,
+  "source_connected": true,
+  "bitrate": 128,
+  "title": "Currently playing track"
+}
+```
+
+## Disable the panel
+
+Set `ENABLE_STATUS_PANEL=0` (or leave it unset) and restart the container. The status API process is not started, and nginx is rendered without the `/api/*` routes, so the surface area is removed completely.
