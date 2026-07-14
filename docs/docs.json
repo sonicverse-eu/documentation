@@ -18,7 +18,7 @@
           },
           {
             "group": "Operators",
-            "pages": ["operators/status-panel"]
+            "pages": ["operators/status-panel", "operators/stack-config"]
           },
           {
             "group": "Changelog",

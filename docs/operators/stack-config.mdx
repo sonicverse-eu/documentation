@@ -1,0 +1,174 @@
+---
+title: "Stack config control plane"
+description: "Read and change the running Sonicverse stack — ingests, Icecast outputs, HLS variants, and processing — through the status API without editing files or restarting the container by hand."
+---
+
+The stack config control plane is a set of `/api/stack/*` endpoints on the [status panel](/operators/status-panel) that let operators manage the running stack as data. A JSON document describes every ingest, Icecast output, HLS variant, and processing parameter; the API validates changes against a schema, writes them to disk, and applies them by re-rendering the Liquidsoap, Icecast, and nginx configs inside the unified container.
+
+Use this API when you want to:
+
+- Add, disable, or reorder harbor ingests without editing Liquidsoap by hand.
+- Add or remove Icecast mounts and change their codec, bitrate, samplerate, or channel count.
+- Toggle HLS output on or off, or tweak its variants and segment duration.
+- Adjust crossfade and buffer behavior at runtime.
+- Drive all of the above from the operator dashboard or a CI pipeline.
+
+## How it works
+
+The control plane lives inside the status API and is only exposed when the [status panel is enabled](/operators/status-panel#enable-the-status-panel).
+
+- **Read endpoints** (`GET`) require a valid Appwrite JWT.
+- **Write endpoints** (`PUT`, `PATCH`, `POST`, `DELETE`) additionally require the operator role (`STATUS_PANEL_WRITE_ROLES`, defaults to `owner,admin`).
+- **Validation** runs on every write. A JSON Schema (Draft 2020-12) enforces field shapes; a second business-rule pass rejects duplicate ingest ports, missing enabled outputs, unknown codecs, and ingest ports outside the allowed set.
+- **Applying** re-renders `radio.liq`, `icecast.xml`, and the streams landing page, then triggers an in-container reload of Liquidsoap and Icecast.
+
+Writes to `/api/stack/config` are staged — nothing changes on the running services until you call `POST /api/stack/apply`.
+
+## Configure the control plane
+
+The control plane inherits authentication from the status panel. To change the set of ingest ports operators may assign, set:
+
+| Variable | Description |
+| --- | --- |
+| `STACK_ALLOWED_INGEST_PORTS` | Comma-separated list of harbor ports operators may configure. Defaults to `8010,8011`. |
+| `STACK_APPLY_TIMEOUT_S` | Seconds to wait for the in-container reload to finish before returning an error. Defaults to `120`. |
+| `STACK_APP_CONTAINER` | Name of the unified container to reload against when the API runs out-of-container. Defaults to `sonicverse-app`. |
+
+The defaults ship in `config/stack.defaults.json` and cover the six Icecast mounts and three HLS variants used by the reference stack.
+
+## Config document
+
+Every read and write uses the same shape:
+
+```json
+{
+  "version": 1,
+  "ingests": [
+    { "id": "primary",   "type": "harbor", "port": 8010, "priority": 1, "enabled": true },
+    { "id": "secondary", "type": "harbor", "port": 8011, "priority": 2, "enabled": true }
+  ],
+  "outputs": [
+    {
+      "id": "mp3-128",
+      "type": "icecast",
+      "mount": "/stream-mp3-128",
+      "codec": "mp3",
+      "bitrate": 128,
+      "samplerate": 44100,
+      "channels": 2,
+      "enabled": true
+    }
+  ],
+  "hls": {
+    "enabled": true,
+    "playlist": "live.m3u8",
+    "segment_duration": 4.0,
+    "variants": [
+      { "id": "aac_64",  "bitrate": 64  },
+      { "id": "aac_128", "bitrate": 128 },
+      { "id": "aac_256", "bitrate": 256 }
+    ]
+  },
+  "processing": {
+    "crossfade_seconds": 0.35,
+    "buffer_seconds": 6.0,
+    "max_buffer_seconds": 25.0
+  }
+}
+```
+
+Constraints enforced on every write:
+
+- At least one ingest must be enabled, and every ingest port must be listed in `STACK_ALLOWED_INGEST_PORTS`.
+- At least one Icecast output or HLS variant must be enabled.
+- Icecast `codec` is one of `mp3`, `fdkaac`, `vorbis`. `bitrate` is between 32 and 512, `samplerate` is `44100` or `48000`, `channels` is `1` or `2`.
+- Mounts match `^/[a-z0-9-]+$` and must be unique across enabled outputs.
+- `processing.crossfade_seconds` is 0–5, `buffer_seconds` is 1–30, `max_buffer_seconds` is 5–60.
+
+## Endpoints
+
+| Method | Path | Auth | Description |
+| --- | --- | --- | --- |
+| `GET` | `/api/stack/schema` | Required | JSON Schema, allowed ingest ports, mount pattern, and allowed Icecast codecs. |
+| `GET` | `/api/stack/config` | Required | Current staged config plus metadata (last modified timestamp). |
+| `PUT` | `/api/stack/config` | Operator | Replace the whole config. Returns `400` with a list of validation errors on failure. |
+| `PATCH` | `/api/stack/ingests/{id}` | Operator | Update a single ingest. Pass `create: true` to add a new one. Refuses to disable the last enabled ingest. |
+| `DELETE` | `/api/stack/ingests/{id}` | Operator | Remove an ingest. Refuses to remove the last enabled one. |
+| `POST` | `/api/stack/outputs` | Operator | Add a new Icecast output. Requires `id`, `mount`, `codec`, `bitrate`. |
+| `PATCH` | `/api/stack/outputs/{id}` | Operator | Update fields on an existing output. |
+| `DELETE` | `/api/stack/outputs/{id}` | Operator | Remove an output. Refuses to remove the last enabled output unless HLS has enabled variants. |
+| `POST` | `/api/stack/apply` | Operator | Re-render configs and reload Liquidsoap, Icecast, and nginx. Optionally accepts a `config` body to write and apply in one call. |
+| `GET` | `/api/stack/apply/status` | Required | Status of the last apply — timestamp, outcome, and any error message. |
+| `GET` | `/api/stack/health` | Required | Compares desired mounts (from config) against effective mounts (from Icecast stats). Reports `missing_mounts`, `extra_mounts`, and Icecast status. |
+
+## Example: add a 320 kbps AAC mount
+
+Stage the change with `PATCH`, then apply it:
+
+```bash
+# Add a new AAC 320 output
+curl -X POST \
+  -H "Authorization: Bearer $APPWRITE_JWT" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "aac-320",
+    "mount": "/stream-aac-320",
+    "codec": "fdkaac",
+    "bitrate": 320,
+    "samplerate": 44100,
+    "channels": 2,
+    "enabled": true
+  }' \
+  https://stream.example.com/api/stack/outputs
+
+# Apply — re-renders configs and reloads Liquidsoap + Icecast
+curl -X POST \
+  -H "Authorization: Bearer $APPWRITE_JWT" \
+  https://stream.example.com/api/stack/apply
+```
+
+A successful apply returns:
+
+```json
+{
+  "ok": true,
+  "status": {
+    "state": "applied",
+    "timestamp": 1752451200,
+    "error": null
+  }
+}
+```
+
+If validation fails, the write returns `400` and the config on disk is unchanged:
+
+```json
+{ "error": "outputs.6.bitrate: 800 is greater than the maximum of 512" }
+```
+
+## Example: check that the running stack matches config
+
+`/api/stack/health` is a quick sanity check for monitoring:
+
+```bash
+curl -H "Authorization: Bearer $APPWRITE_JWT" \
+  https://stream.example.com/api/stack/health
+```
+
+```json
+{
+  "healthy": true,
+  "desired_mounts": ["/stream-aac-128", "/stream-mp3-128", "/stream-mp3-192"],
+  "effective_mounts": ["/stream-aac-128", "/stream-mp3-128", "/stream-mp3-192"],
+  "missing_mounts": [],
+  "extra_mounts": [],
+  "apply_status": { "state": "applied", "timestamp": 1752451200, "error": null },
+  "icecast_status": "ok"
+}
+```
+
+`missing_mounts` are configured mounts that Icecast is not currently serving — usually the sign of a failed apply or a Liquidsoap source that has not connected yet. `extra_mounts` are mounts Icecast is serving that no longer appear in the config.
+
+## Roll back a change
+
+Every apply is idempotent — call `PUT /api/stack/config` with the previous document (or a snapshot saved from `GET /api/stack/config`) and `POST /api/stack/apply` again to restore the previous state.

@@ -3,6 +3,14 @@ title: "Sonicverse changelog: streaming stack release notes"
 description: "Release notes for the Sonicverse open broadcast stack, including audio streaming runtime updates, new features, bug fixes, and operator changes."
 ---
 
+## July 14, 2026
+
+### Audio streaming stack
+
+<Update label="New features">
+  **Stack config control plane.** The status API now exposes `/api/stack/*` endpoints for managing ingests, Icecast outputs, HLS variants, and processing settings as a validated JSON document. Operators can add or remove mounts, tweak bitrates, and reload Liquidsoap and Icecast without editing config files by hand. See [Stack config control plane](/operators/stack-config) for the full endpoint reference and examples.
+</Update>
+
 ## June 12, 2026
 
 ### Audio streaming stack
