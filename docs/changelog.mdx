@@ -3,6 +3,14 @@ title: "Sonicverse changelog: streaming stack release notes"
 description: "Release notes for the Sonicverse open broadcast stack, including audio streaming runtime updates, new features, bug fixes, and operator changes."
 ---
 
+## July 14, 2026
+
+### Audio streaming stack
+
+<Update label="New features">
+  **Stack config control plane API.** The [status panel](/operators/status-panel) now exposes a set of `/api/stack/*` endpoints that let operators inspect and edit the running stack configuration &mdash; ingests, Icecast outputs, HLS, and processing &mdash; without editing files on the server or restarting the container by hand. Fetch the current config and its schema, add or update outputs, enable and disable ingests, then apply changes and poll apply status from a single JSON API. Write endpoints stay behind the existing operator role, so only trusted team members can push changes live.
+</Update>
+
 ## June 12, 2026
 
 ### Audio streaming stack
